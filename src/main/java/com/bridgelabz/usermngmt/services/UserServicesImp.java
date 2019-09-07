@@ -5,7 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -75,10 +76,8 @@ public class UserServicesImp implements IUserServices {
 		return false;
 	}
 
-	public String getDate() {
-		LocalDate localDate = LocalDate.now();
-		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-		return localDate.format(dateFormat);
+	public LocalDate getDate() {
+		return LocalDate.now();
 	}
 
 	@Override
@@ -96,7 +95,7 @@ public class UserServicesImp implements IUserServices {
 	}
 
 	@Override
-	public Response update(UserDto userDto, String token) throws UserException {
+	public Response update(UserDto userDto, String token, Long adminId) throws UserException {
 		Long userId = tokenGenerator.decodeToken(token);
 		Optional<User> user = userRepository.findById(userId);
 		if (!user.isPresent()) {
@@ -108,23 +107,34 @@ public class UserServicesImp implements IUserServices {
 	}
 
 	@Override
-	public Response delete(Long userId, String token) {
+	public Response delete(Long userId, String token) throws UserException {
 		Long adminId = tokenGenerator.decodeToken(token);
 		Optional<User> admin = userRepository.findById(adminId);
-		
+		if (admin.get().isUserRole() == false) {
+			throw new UserException(environment.getProperty("user.role.admin"));
+		}
+		userRepository.deleteById(userId);
 		return null;
 	}
 
 	@Override
-	public Response getAll() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<User> getAll() {
+		return userRepository.findAll();
 	}
 
 	@Override
-	public Response getStatus(String token) {
-		// TODO Auto-generated method stub
-		return null;
+	public HashMap<String, List<User>> getStatus(String token) throws UserException {
+		Long adminId = tokenGenerator.decodeToken(token);
+		Optional<User> admin = userRepository.findById(adminId);
+		if (admin.get().isUserRole() == false) {
+			throw new UserException(environment.getProperty("user.role.admin"));
+		}
+		List<User> active = userRepository.findByStatusTrue();
+		List<User> inActive = userRepository.findByStatusFalse();
+		HashMap<String, List<User>> map = new HashMap<>();
+		map.put("Active", active);
+		map.put("InActive", inActive);
+		return map;
 	}
 
 }

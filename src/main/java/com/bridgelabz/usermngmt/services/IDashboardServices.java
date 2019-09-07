@@ -1,19 +1,22 @@
 package com.bridgelabz.usermngmt.services;
 
+import java.util.HashMap;
+
 import org.springframework.stereotype.Service;
 
 import com.bridgelabz.usermngmt.config.Response;
+import com.bridgelabz.usermngmt.exception.UserException;
 
 @Service
 public interface IDashboardServices {
 
-	Response getLocation();
+	HashMap<String, Long> getLocation(String token)throws UserException;
 
-	Response getGender();
+	HashMap<String, Long> getGender(String token) throws UserException;
 
-	Response getLatest();
+	HashMap<String, Long> getLatest(String token)throws UserException;
 
-	Response getAge();
+	HashMap<String, Integer> getAge(String token)throws UserException;
 
-	Response getHistory();
+	Response getHistory(String token)throws UserException;
 }

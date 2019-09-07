@@ -1,6 +1,8 @@
 package com.bridgelabz.usermngmt.model;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -32,5 +34,6 @@ public class User implements Serializable {
 	private String password;
 	private boolean userRole;
 	private boolean status;
-	private String regDate;
+	private LocalDate regDate;
+
 }
