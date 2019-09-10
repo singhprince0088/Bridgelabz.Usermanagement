@@ -47,9 +47,6 @@ public class UserDto {
 
 	@NotEmpty(message = "Please Enter Password")
 	private String password;
-
-	@NotEmpty(message = "Please Enter Role")
-	private boolean userRole;
 	
 	@NotEmpty(message = "Please Enter Status")
 	private boolean status;

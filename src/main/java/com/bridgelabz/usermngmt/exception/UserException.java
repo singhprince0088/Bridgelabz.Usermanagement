@@ -11,11 +11,13 @@ public class UserException extends Exception {
 	String msg;
 
 	public UserException(int code, String msg) {
+		super(msg);
 		this.code = code;
 		this.msg = msg;
 	}
 
 	public UserException(String msg) {
+		super(msg);
 		this.msg = msg;
 	}
 

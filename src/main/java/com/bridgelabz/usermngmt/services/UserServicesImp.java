@@ -47,7 +47,7 @@ public class UserServicesImp implements IUserServices {
 	private final Path fileLocation = java.nio.file.Paths.get("/home/user/USER_DP/");
 
 	@Override
-	public Response register(UserDto userDto, MultipartFile image) throws UserException {
+	public Response register(UserDto userDto) throws UserException {
 		if (!validateUser(userDto.getEmail())) {
 			throw new UserException(environment.getProperty("status.register.emailExistError"));
 		}
@@ -55,29 +55,24 @@ public class UserServicesImp implements IUserServices {
 		String password = passwordEncoder.encode(userDto.getPassword());
 		user.setRegDate(getDate());
 		user.setPassword(password);
+		userRepository.save(user);
+		return new Response(200,"register succesfully") ;
+	}
 
+	@Override
+	public Response uploadImage(MultipartFile image, String token) {
+		long userId = tokenGenerator.decodeToken(token);
+		Optional<User> user = userRepository.findById(userId);
 		UUID uuid = UUID.randomUUID();
 		String uniqueId = uuid.toString();
 		try {
 			Files.copy(image.getInputStream(), fileLocation.resolve(uniqueId), StandardCopyOption.REPLACE_EXISTING);
-			user.setProfilePic(uniqueId);
+			user.get().setProfilePic(uniqueId);
+			userRepository.save(user.get());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		userRepository.save(user);
-		return null;
-	}
-
-	public boolean validateUser(String email) {
-		Optional<User> user = userRepository.findByEmail(email);
-		if (!user.isPresent()) {
-			return true;
-		}
-		return false;
-	}
-
-	public LocalDate getDate() {
-		return LocalDate.now();
+		return new Response(200,"image uploaded succesfully") ;
 	}
 
 	@Override
@@ -89,9 +84,12 @@ public class UserServicesImp implements IUserServices {
 		if (!passwordEncoder.matches(loginDto.getPassword(), user.get().getPassword())) {
 			throw new UserException(environment.getProperty("user.login.password"));
 		}
+		if(!user.get().isUserRole()) {
+			throw new UserException(environment.getProperty("user.role.admin"));
+		}
 		String token = tokenGenerator.createToken(user.get().getId());
 		System.out.println(token);
-		return null;
+		return new Response(200,"login succesfully") ;
 	}
 
 	@Override
@@ -103,7 +101,7 @@ public class UserServicesImp implements IUserServices {
 		}
 		mapper.map(userDto, User.class);
 		userRepository.save(user.get());
-		return null;
+		return new Response(200,"update succesfully") ;
 	}
 
 	@Override
@@ -114,7 +112,7 @@ public class UserServicesImp implements IUserServices {
 			throw new UserException(environment.getProperty("user.role.admin"));
 		}
 		userRepository.deleteById(userId);
-		return null;
+		return new Response(200,"delete succesfully") ;
 	}
 
 	@Override
@@ -135,6 +133,18 @@ public class UserServicesImp implements IUserServices {
 		map.put("Active", active);
 		map.put("InActive", inActive);
 		return map;
+	}
+
+	public boolean validateUser(String email) {
+		Optional<User> user = userRepository.findByEmail(email);
+		if (!user.isPresent()) {
+			return true;
+		}
+		return false;
+	}
+
+	public LocalDate getDate() {
+		return LocalDate.now();
 	}
 
 }

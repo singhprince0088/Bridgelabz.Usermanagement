@@ -33,12 +33,18 @@ public class UserController {
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 	@Autowired
 	private IUserServices userServices;
-//	(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	
 	@PostMapping
-	public ResponseEntity<Response> register(@RequestBody UserDto userDto, @RequestParam MultipartFile image)
+	public ResponseEntity<Response> register(@RequestBody UserDto userDto)
 			throws UserException {
 		logger.info("creating new user - {}", userDto.getEmail());
-		return new ResponseEntity<>(userServices.register(userDto, image), HttpStatus.OK);
+		return new ResponseEntity<>(userServices.register(userDto), HttpStatus.OK);
+	}
+
+	@PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<Response> uploadImage(@RequestHeader String token, @RequestParam MultipartFile image) {
+		logger.info("uploading profile pic");
+		return new ResponseEntity<>(userServices.uploadImage(image, token), HttpStatus.OK);
 	}
 
 	@PutMapping("/login")

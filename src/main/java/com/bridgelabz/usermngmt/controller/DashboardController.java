@@ -1,18 +1,17 @@
 package com.bridgelabz.usermngmt.controller;
 
+import java.util.List;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bridgelabz.usermngmt.config.Response;
 import com.bridgelabz.usermngmt.exception.UserException;
+import com.bridgelabz.usermngmt.model.User;
 import com.bridgelabz.usermngmt.services.IDashboardServices;
 
 @RestController
@@ -38,12 +37,12 @@ public class DashboardController {
 	}
 
 	@GetMapping("/latest")
-	public HashMap<String, Long> getLatest(@RequestHeader String token) throws UserException {
+	public List<User> getLatest(@RequestHeader String token) throws UserException {
 		return dashboardServices.getLatest(token);
 	}
 
 	@GetMapping("/history")
-	public ResponseEntity<Response> getHistory(@RequestHeader String token) throws UserException {
-		return new ResponseEntity<>(dashboardServices.getHistory(token), HttpStatus.OK);
+	public HashMap<String, Integer> getHistory(@RequestHeader String token) throws UserException {
+		return dashboardServices.getHistory(token);
 	}
 }

@@ -15,8 +15,7 @@ import com.bridgelabz.usermngmt.model.User;
 @Service
 public interface IUserServices {
 
-	Response register(UserDto userDto, MultipartFile image) throws UserException;
-//	Response register(UserDto userDto) throws UserException;
+	Response register(UserDto userDto) throws UserException;
 
 	Response login(LoginDto loginDto) throws UserException;
 
@@ -27,5 +26,7 @@ public interface IUserServices {
 	List<User> getAll();
 
 	HashMap<String, List<User>> getStatus(String token) throws UserException;
+
+	Response uploadImage(MultipartFile image, String token);
 
 }
