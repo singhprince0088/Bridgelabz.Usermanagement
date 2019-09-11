@@ -19,14 +19,14 @@ public interface IUserServices {
 
 	Response login(LoginDto loginDto) throws UserException;
 
-	Response update(UserDto userDto, String token, Long userId) throws UserException;
+	Response update(UserDto userDto, String adminToken, Long userId) throws UserException;
 
 	Response delete(Long userId, String token) throws UserException;
 
-	List<User> getAll();
+	List<User> getAll(String token) throws UserException;
 
 	HashMap<String, List<User>> getStatus(String token) throws UserException;
 
-	Response uploadImage(MultipartFile image, String token);
+	Response uploadImage(MultipartFile image, String token) throws UserException;
 
 }

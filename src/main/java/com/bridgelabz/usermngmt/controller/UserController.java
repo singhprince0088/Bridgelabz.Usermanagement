@@ -33,42 +33,95 @@ public class UserController {
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 	@Autowired
 	private IUserServices userServices;
-	
+
+	/**
+	 * Register User API.
+	 * 
+	 * @param userDto
+	 * @return SuccesResponse
+	 * @throws UserException
+	 */
 	@PostMapping
-	public ResponseEntity<Response> register(@RequestBody UserDto userDto)
-			throws UserException {
+	public ResponseEntity<Response> register(@RequestBody UserDto userDto) throws UserException {
 		logger.info("creating new user - {}", userDto.getEmail());
 		return new ResponseEntity<>(userServices.register(userDto), HttpStatus.OK);
 	}
 
+	/**
+	 * Upload Image.
+	 * 
+	 * @param token
+	 * @param image
+	 * @return SuccesResponse
+	 * @throws UserException
+	 */
 	@PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<Response> uploadImage(@RequestHeader String token, @RequestParam MultipartFile image) {
+	public ResponseEntity<Response> uploadImage(@RequestHeader String token, @RequestParam MultipartFile image)
+			throws UserException {
 		logger.info("uploading profile pic");
 		return new ResponseEntity<>(userServices.uploadImage(image, token), HttpStatus.OK);
 	}
 
+	/**
+	 * API for Login.
+	 * 
+	 * @param loginDto
+	 * @return SuccesResponse
+	 * @throws UserException
+	 */
 	@PutMapping("/login")
 	public ResponseEntity<Response> login(@RequestBody LoginDto loginDto) throws UserException {
 		return new ResponseEntity<>(userServices.login(loginDto), HttpStatus.OK);
 	}
 
+	/**
+	 * API for update user in database.
+	 * 
+	 * @param adminToken
+	 * @param userDto
+	 * @param userId
+	 * @return SuccesResponse
+	 * @throws UserException
+	 */
 	@PutMapping("/update")
-	public ResponseEntity<Response> update(@PathVariable Long adminId, @RequestBody UserDto userDto,
-			@RequestHeader String token) throws UserException {
-		return new ResponseEntity<>(userServices.update(userDto, token, adminId), HttpStatus.OK);
+	public ResponseEntity<Response> update(@RequestParam String adminToken, @RequestBody UserDto userDto,
+			@RequestHeader Long userId) throws UserException {
+		return new ResponseEntity<>(userServices.update(userDto, adminToken, userId), HttpStatus.OK);
 	}
 
+	/**
+	 * API for Delete User.
+	 * 
+	 * @param userId
+	 * @param token
+	 * @return SuccesResponse
+	 * @throws UserException
+	 */
 	@DeleteMapping("/delete")
-	public ResponseEntity<Response> update(@PathVariable Long userId, @RequestHeader String token)
+	public ResponseEntity<Response> delete(@PathVariable Long userId, @RequestHeader String token)
 			throws UserException {
 		return new ResponseEntity<>(userServices.delete(userId, token), HttpStatus.OK);
 	}
 
+	/**
+	 * Get All users.
+	 * 
+	 * @param token
+	 * @return List of users.
+	 * @throws UserException
+	 */
 	@GetMapping
-	public List<User> getAll() {
-		return userServices.getAll();
+	public List<User> getAll(@RequestHeader String token) throws UserException {
+		return userServices.getAll(token);
 	}
 
+	/**
+	 * Get Status of User(Active/InActive).
+	 * 
+	 * @param token
+	 * @return HashMap of users status.
+	 * @throws UserException
+	 */
 	@GetMapping("/status")
 	public HashMap<String, List<User>> getStatus(@RequestHeader String token) throws UserException {
 		return userServices.getStatus(token);
