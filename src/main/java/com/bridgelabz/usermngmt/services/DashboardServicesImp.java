@@ -16,10 +16,20 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.bridgelabz.usermngmt.config.TokenGenerator;
+import com.bridgelabz.usermngmt.config.Utility;
 import com.bridgelabz.usermngmt.exception.UserException;
 import com.bridgelabz.usermngmt.model.User;
 import com.bridgelabz.usermngmt.repository.IUserRepository;
 
+/**
+ * This class implements all methods of {@link IDashboardServices} interface.
+ * which exposes dashboard services logic.
+ * 
+ * @since september-2019
+ * @author Prince Singh
+ * @version 1.0
+ *
+ */
 @Service
 @PropertySource("classpath:response.properties")
 public class DashboardServicesImp implements IDashboardServices {
@@ -33,6 +43,36 @@ public class DashboardServicesImp implements IDashboardServices {
 	@Autowired
 	private Environment environment;
 
+	@Autowired
+	private Utility util;
+
+	/**
+	 * This method contains logic of giving status of users.
+	 * 
+	 * @param Token(Admin)
+	 * @return active/inactive users
+	 * @throws UserException.
+	 */
+	@Override
+	public HashMap<String, List<User>> getStatus(String token) throws UserException {
+		if (validateAdmin(token)) {
+			List<User> active = userRepository.findByStatusTrue();
+			List<User> inActive = userRepository.findByStatusFalse();
+			HashMap<String, List<User>> map = new HashMap<>();
+			map.put("Active", active);
+			map.put("InActive", inActive);
+			return map;
+		}
+		return null;
+	}
+
+	/**
+	 * Get all Locations by number of users.
+	 * 
+	 * @param Token(contains adminId).
+	 * @return Locations.
+	 * @throws UserException.
+	 */
 	@Override
 	public HashMap<String, Long> getLocation(String token) throws UserException {
 		if (!validateAdmin(token)) {
@@ -51,6 +91,13 @@ public class DashboardServicesImp implements IDashboardServices {
 		return map;
 	}
 
+	/**
+	 * Get number of Genders.
+	 * 
+	 * @param Token(contains adminId).
+	 * @return Gender.
+	 * @throws UserException.
+	 */
 	@Override
 	public HashMap<String, Long> getGender(String token) throws UserException {
 		if (!validateAdmin(token)) {
@@ -65,6 +112,13 @@ public class DashboardServicesImp implements IDashboardServices {
 		return map;
 	}
 
+	/**
+	 * Get list of users according to latest registration.
+	 * 
+	 * @param Token(contains adminId).
+	 * @return List of users.
+	 * @throws UserException.
+	 */
 	@Override
 	public List<User> getLatest(String token) throws UserException {
 		if (!validateAdmin(token)) {
@@ -75,22 +129,29 @@ public class DashboardServicesImp implements IDashboardServices {
 		return latestSorted;
 	}
 
+	/**
+	 * Get all number of users by age group.
+	 * 
+	 * @param Token(contains adminId).
+	 * @return age groups.
+	 * @throws UserException.
+	 */
 	@Override
 	public HashMap<String, Integer> getAge(String token) throws UserException {
 		if (!validateAdmin(token)) {
 			throw new UserException(environment.getProperty("user.role.admin"));
 		}
 		List<User> allUser = userRepository.findAll();
-		int below18 = 0;
+		int _below18 = 0;
 		int between18_25 = 0;
 		int between25_32 = 0;
 		int between32_40 = 0;
-		int over40 = 0;
+		int over40_ = 0;
 
 		for (User user : allUser) {
-			Period period = Period.between(user.getRegDate(), getDate());
+			Period period = Period.between(user.getRegDate(), util.getDate());
 			if (period.getYears() < 18) {
-				below18++;
+				_below18++;
 			} else if (period.getYears() >= 18 || period.getYears() < 25) {
 				between18_25++;
 			} else if (period.getYears() >= 25 || period.getYears() < 32) {
@@ -98,19 +159,26 @@ public class DashboardServicesImp implements IDashboardServices {
 			} else if (period.getYears() >= 32 || period.getYears() < 40) {
 				between32_40++;
 			} else if (period.getYears() > 40) {
-				over40++;
+				over40_++;
 			}
 		}
 		HashMap<String, Integer> map = new HashMap<>();
-		map.put("Under 18", below18);
+		map.put("Under 18", _below18);
 		map.put("18-25", between18_25);
 		map.put("25-32", between25_32);
 		map.put("32-40", between32_40);
-		map.put("over 40", over40);
+		map.put("over 40", over40_);
 
 		return map;
 	}
 
+	/**
+	 * Get history of registrations.
+	 * 
+	 * @param Token(contains adminId).
+	 * @return no. of registration in two consecutive months groups.
+	 * @throws UserException.
+	 */
 	@Override
 	public HashMap<String, Integer> getHistory(String token) {
 		int july_aug18 = 0, sep_oct18 = 0, nov_dec18 = 0, jan_feb19 = 0, mar_april19 = 0, may_june19 = 0,
@@ -162,10 +230,12 @@ public class DashboardServicesImp implements IDashboardServices {
 		return map;
 	}
 
-	public LocalDate getDate() {
-		return LocalDate.now();
-	}
-
+	/**
+	 * Validate admin.
+	 * 
+	 * @param token.
+	 * @return true if admin present, or false.
+	 */
 	public boolean validateAdmin(String token) {
 		Long adminId = tokenGenerator.decodeToken(token);
 		Optional<User> admin = userRepository.findById(adminId);

@@ -27,6 +27,14 @@ import com.bridgelabz.usermngmt.exception.UserException;
 import com.bridgelabz.usermngmt.model.User;
 import com.bridgelabz.usermngmt.services.IUserServices;
 
+/**
+ * Controller class for user APIs.
+ * 
+ * @since september-2019
+ * @author Prince Singh
+ * @version 1.0
+ *
+ */
 @RequestMapping(value = "/user")
 @RestController
 public class UserController {
@@ -83,10 +91,10 @@ public class UserController {
 	 * @return SuccesResponse
 	 * @throws UserException
 	 */
-	@PutMapping("/update")
+	@PutMapping("/update/{role}")
 	public ResponseEntity<Response> update(@RequestParam String adminToken, @RequestBody UserDto userDto,
-			@RequestHeader Long userId) throws UserException {
-		return new ResponseEntity<>(userServices.update(userDto, adminToken, userId), HttpStatus.OK);
+			@RequestHeader Long userId, @PathVariable boolean role) throws UserException {
+		return new ResponseEntity<>(userServices.update(userDto, adminToken, userId, role), HttpStatus.OK);
 	}
 
 	/**
@@ -113,18 +121,6 @@ public class UserController {
 	@GetMapping
 	public List<User> getAll(@RequestHeader String token) throws UserException {
 		return userServices.getAll(token);
-	}
-
-	/**
-	 * Get Status of User(Active/InActive).
-	 * 
-	 * @param token
-	 * @return HashMap of users status.
-	 * @throws UserException
-	 */
-	@GetMapping("/status")
-	public HashMap<String, List<User>> getStatus(@RequestHeader String token) throws UserException {
-		return userServices.getStatus(token);
 	}
 
 }

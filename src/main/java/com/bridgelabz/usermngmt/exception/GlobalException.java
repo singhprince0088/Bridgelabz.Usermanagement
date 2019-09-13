@@ -8,6 +8,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.bridgelabz.usermngmt.config.Response;
 
+/**
+ * Class for handling globalException by custom in project
+ * 
+ * @author Prince Singh
+ *
+ */
 @ControllerAdvice
 public class GlobalException {
 

@@ -1,10 +1,13 @@
 package com.bridgelabz.usermngmt.exception;
 
+/**
+ * Class for handling exceptions by custom
+ * 
+ * @author Prince Singh
+ *
+ */
 public class UserException extends Exception {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -4868809895408514510L;
 
 	int code;

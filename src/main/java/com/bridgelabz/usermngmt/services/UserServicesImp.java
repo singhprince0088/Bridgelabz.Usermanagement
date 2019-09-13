@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,12 +18,22 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.bridgelabz.usermngmt.config.Response;
 import com.bridgelabz.usermngmt.config.TokenGenerator;
+import com.bridgelabz.usermngmt.config.Utility;
 import com.bridgelabz.usermngmt.dto.LoginDto;
 import com.bridgelabz.usermngmt.dto.UserDto;
 import com.bridgelabz.usermngmt.exception.UserException;
 import com.bridgelabz.usermngmt.model.User;
 import com.bridgelabz.usermngmt.repository.IUserRepository;
 
+/**
+ * This class implements all methods of {@link IUserServices} interface. which
+ * performs CRUD of user in database.
+ * 
+ * @since september-2019
+ * @author Prince Singh
+ * @version 1.0
+ *
+ */
 @Service
 @PropertySource("classpath:response.properties")
 public class UserServicesImp implements IUserServices {
@@ -43,6 +51,12 @@ public class UserServicesImp implements IUserServices {
 
 	@Autowired
 	private ModelMapper mapper;
+
+	@Autowired
+	private Response response;
+
+	@Autowired
+	private Utility utility;
 
 	private final Path fileLocation = java.nio.file.Paths.get("/home/user/USER_DP/");
 
@@ -63,7 +77,7 @@ public class UserServicesImp implements IUserServices {
 			user.setUserRole(true);
 		}
 		String password = passwordEncoder.encode(userDto.getPassword());
-		user.setRegDate(getDate());
+		user.setRegDate(utility.getDate());
 		user.setPassword(password);
 		userRepository.save(user);
 		return new Response(200, "register succesfully");
@@ -91,7 +105,7 @@ public class UserServicesImp implements IUserServices {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return buildSuccesResponse(null);
+		return response.buildSuccesResponse(null);
 	}
 
 	/**
@@ -115,8 +129,9 @@ public class UserServicesImp implements IUserServices {
 		}
 		String token = tokenGenerator.createToken(user.get().getId());
 		System.out.println(token);
-		return buildSuccesResponse(null);
+		return response.buildSuccesResponse(null);
 	}
+
 	/**
 	 * Update user.
 	 * 
@@ -127,16 +142,20 @@ public class UserServicesImp implements IUserServices {
 	 * @throws UserException.
 	 */
 	@Override
-	public Response update(UserDto userDto, String adminToken, Long userId) throws UserException {
+	public Response update(UserDto userDto, String adminToken, Long userId, boolean role) throws UserException {
 		if (validateAdmin(adminToken)) {
-			return userRepository.findById(userId).map(user -> {
+			userRepository.findById(userId).map(user -> {
 				mapper.map(userDto, User.class);
 				return user;
-			}).map(userRepository::save).map(this::buildSuccesResponse)
+			}).map(user -> {
+				user.setUserRole(role);
+				return user;
+			}).map(userRepository::save)
 					.orElseThrow(() -> new UserException(environment.getProperty("user.doesn't.exist")));
 		}
-		return null;
+		return response.buildSuccesResponse(null);
 	}
+
 	/**
 	 * Delete user.
 	 * 
@@ -150,11 +169,12 @@ public class UserServicesImp implements IUserServices {
 		if (validateAdmin(token)) {
 			return userRepository.findById(userId).map(user -> {
 				userRepository.delete(user);
-				return buildSuccesResponse(null);
+				return response.buildSuccesResponse(null);
 			}).orElseThrow(() -> new UserException(environment.getProperty("user.doesn't.exist")));
 		}
 		return null;
 	}
+
 	/**
 	 * getAll users.
 	 * 
@@ -171,26 +191,12 @@ public class UserServicesImp implements IUserServices {
 		return userRepository.findAll();
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public HashMap<String, List<User>> getStatus(String token) throws UserException {
-		if (validateAdmin(token)) {
-			/*
-			 * List<User> active = userRepository.findByStatusTrue(); List<User> inActive =
-			 * userRepository.findByStatusFalse();
-			 */
-			List<User> users = userRepository.findAll();
-			List<User> active = (List<User>) users.stream().filter(user -> user.isStatus() == true);
-			List<User> inActive = (List<User>) users.stream().filter(user -> user.isStatus() == false);
-
-			HashMap<String, List<User>> map = new HashMap<>();
-			map.put("Active", active);
-			map.put("InActive", inActive);
-			return map;
-		}
-		return null;
-	}
-
+	/**
+	 * method for validating user.
+	 * 
+	 * @param email
+	 * @return true if user present,otherwiswe false
+	 */
 	public boolean validateUser(String email) {
 		Optional<User> user = userRepository.findByEmail(email);
 		if (!user.isPresent()) {
@@ -199,10 +205,13 @@ public class UserServicesImp implements IUserServices {
 		return false;
 	}
 
-	public LocalDate getDate() {
-		return LocalDate.now();
-	}
-
+	/**
+	 * method for validating admin.
+	 * 
+	 * @param token
+	 * @return true if admin available, otherwise false
+	 * @throws UserException
+	 */
 	public boolean validateAdmin(String token) throws UserException {
 		User admin = userRepository.findById(tokenGenerator.decodeToken(token))
 				.orElseThrow(() -> new UserException(environment.getProperty("user.role.admin")));
@@ -211,9 +220,4 @@ public class UserServicesImp implements IUserServices {
 		}
 		return false;
 	}
-
-	public <T> Response buildSuccesResponse(T t) {
-		return new Response(200, "Success");
-	}
-
 }
