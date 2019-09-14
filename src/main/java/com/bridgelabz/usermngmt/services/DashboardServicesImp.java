@@ -2,7 +2,6 @@ package com.bridgelabz.usermngmt.services;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -181,52 +180,43 @@ public class DashboardServicesImp implements IDashboardServices {
 	 */
 	@Override
 	public HashMap<String, Integer> getHistory(String token) {
-		int july_aug18 = 0, sep_oct18 = 0, nov_dec18 = 0, jan_feb19 = 0, mar_april19 = 0, may_june19 = 0,
-				july_aug19 = 0, sep_oct19 = 0, nov_dec19 = 0;
+		int count0 = 0, count1 = 0, count2 = 0, count3 = 0, count4 = 0, count5 = 0, count6 = 0;
+		LocalDate todayDate = LocalDate.now();
+		LocalDate presentMonth = todayDate.minusMonths(0);
+		LocalDate firstLastMonth = todayDate.minusMonths(1);
+		LocalDate secondLastMonth = todayDate.minusMonths(2);
+		LocalDate thirdLastMonth = todayDate.minusMonths(3);
+		LocalDate fourthLastMonth = todayDate.minusMonths(4);
+		LocalDate fifthLastMonth = todayDate.minusMonths(5);
+		LocalDate sixthLastMonth = todayDate.minusMonths(6);
+
 		List<User> users = userRepository.findAll();
 		for (User user : users) {
-			DateTimeFormatter formmater = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-			String date = user.getRegDate().format(formmater);
-
-			if ((LocalDate.parse(date).isAfter(LocalDate.parse("2018-06-30")))
-					&& (LocalDate.parse(date).isBefore(LocalDate.parse("2018-09-01")))) {
-				july_aug18++;
-			} else if ((LocalDate.parse(date).isAfter(LocalDate.parse("2018-08-31")))
-					&& (LocalDate.parse(date).isBefore(LocalDate.parse("2018-11-01")))) {
-				sep_oct18++;
-			} else if ((LocalDate.parse(date).isAfter(LocalDate.parse("2018-10-31")))
-					&& (LocalDate.parse(date).isBefore(LocalDate.parse("2019-01-01")))) {
-				nov_dec18++;
-			} else if ((LocalDate.parse(date).isAfter(LocalDate.parse("2018-12-31")))
-					&& (LocalDate.parse(date).isBefore(LocalDate.parse("2019-03-01")))) {
-				jan_feb19++;
-			} else if ((LocalDate.parse(date).isAfter(LocalDate.parse("2019-02-28")))
-					&& (LocalDate.parse(date).isBefore(LocalDate.parse("2019-05-01")))) {
-				mar_april19++;
-			} else if ((LocalDate.parse(date).isAfter(LocalDate.parse("2019-04-30")))
-					&& (LocalDate.parse(date).isBefore(LocalDate.parse("2019-07-01")))) {
-				may_june19++;
-			} else if ((LocalDate.parse(date).isAfter(LocalDate.parse("2019-06-30")))
-					&& (LocalDate.parse(date).isBefore(LocalDate.parse("2019-09-01")))) {
-				july_aug19++;
-			} else if ((LocalDate.parse(date).isAfter(LocalDate.parse("2019-08-31")))
-					&& (LocalDate.parse(date).isBefore(LocalDate.parse("2019-11-01")))) {
-				sep_oct19++;
-			} else if ((LocalDate.parse(date).isAfter(LocalDate.parse("2019-10-31")))
-					&& (LocalDate.parse(date).isBefore(LocalDate.parse("2020-01-01")))) {
-				nov_dec19++;
+			if (user.getRegDate().getMonth().equals(presentMonth.getMonth())) {
+				count0++;
+			} else if (user.getRegDate().getMonth().equals(firstLastMonth.getMonth())) {
+				count1++;
+			} else if (user.getRegDate().getMonth().equals(secondLastMonth.getMonth())) {
+				count2++;
+			} else if (user.getRegDate().getMonth().equals(thirdLastMonth.getMonth())) {
+				count3++;
+			} else if (user.getRegDate().getMonth().equals(fourthLastMonth.getMonth())) {
+				count4++;
+			} else if (user.getRegDate().getMonth().equals(fifthLastMonth.getMonth())) {
+				count5++;
+			} else if (user.getRegDate().getMonth().equals(sixthLastMonth.getMonth())) {
+				count6++;
 			}
 		}
+
 		LinkedHashMap<String, Integer> map = new LinkedHashMap<>();
-		map.put("July-August 2018", july_aug18);
-		map.put("September-October 2018", sep_oct18);
-		map.put("November-December 2018", nov_dec18);
-		map.put("January-February 2019", jan_feb19);
-		map.put("March-April 2019", mar_april19);
-		map.put("May-June 2019", may_june19);
-		map.put("July-August 2019", july_aug19);
-		map.put("September-October 2019", sep_oct19);
-		map.put("November-December 2019", nov_dec19);
+		map.put("Present Month", count0);
+		map.put("First Last Month", count1);
+		map.put("Second Last Month", count2);
+		map.put("Third Last Month", count3);
+		map.put("Fourth Last Month", count4);
+		map.put("Fifth Last Month", count5);
+		map.put("Sixth Last Month", count6);
 		return map;
 	}
 
