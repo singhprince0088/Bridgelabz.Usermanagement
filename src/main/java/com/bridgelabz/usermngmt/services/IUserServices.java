@@ -9,6 +9,7 @@ import com.bridgelabz.usermngmt.config.Response;
 import com.bridgelabz.usermngmt.dto.LoginDto;
 import com.bridgelabz.usermngmt.dto.UserDto;
 import com.bridgelabz.usermngmt.exception.UserException;
+import com.bridgelabz.usermngmt.model.LoginHistory;
 import com.bridgelabz.usermngmt.model.User;
 
 /**
@@ -33,5 +34,7 @@ public interface IUserServices {
 	List<User> getAll(String token) throws UserException;
 
 	Response uploadImage(MultipartFile image, String token) throws UserException;
+
+	List<LoginHistory> getloginHistory(String token, Long userId) throws UserException;
 
 }

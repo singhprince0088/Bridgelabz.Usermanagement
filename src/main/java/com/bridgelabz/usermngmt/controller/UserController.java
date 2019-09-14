@@ -24,6 +24,7 @@ import com.bridgelabz.usermngmt.config.Response;
 import com.bridgelabz.usermngmt.dto.LoginDto;
 import com.bridgelabz.usermngmt.dto.UserDto;
 import com.bridgelabz.usermngmt.exception.UserException;
+import com.bridgelabz.usermngmt.model.LoginHistory;
 import com.bridgelabz.usermngmt.model.User;
 import com.bridgelabz.usermngmt.services.IUserServices;
 
@@ -121,6 +122,20 @@ public class UserController {
 	@GetMapping
 	public List<User> getAll(@RequestHeader String token) throws UserException {
 		return userServices.getAll(token);
+	}
+
+	/**
+	 * Get user login history.
+	 * 
+	 * @param token
+	 * @param userId
+	 * @return List of user login's.
+	 * @throws UserException
+	 */
+	@GetMapping("/loginhistory")
+	public List<LoginHistory> getloginHistory(@RequestHeader String token, @RequestParam Long userId)
+			throws UserException {
+		return userServices.getloginHistory(token, userId);
 	}
 
 }

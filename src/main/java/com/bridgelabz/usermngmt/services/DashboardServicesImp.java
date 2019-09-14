@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -78,16 +79,22 @@ public class DashboardServicesImp implements IDashboardServices {
 			throw new UserException(environment.getProperty("user.role.admin"));
 		}
 		List<User> allUser = userRepository.findAll();
-		long usa = allUser.stream().filter(gen -> gen.getCountry().equalsIgnoreCase("usa")).count();
-		long india = allUser.stream().filter(gen -> gen.getCountry().equalsIgnoreCase("india")).count();
-		long canada = allUser.stream().filter(gen -> gen.getCountry().equalsIgnoreCase("canada")).count();
-		long other = allUser.stream().filter(gen -> gen.getCountry().equalsIgnoreCase("other")).count();
-		HashMap<String, Long> map = new HashMap<>();
-		map.put("USA", usa);
-		map.put("India", india);
-		map.put("Canada", canada);
-		map.put("Other", other);
-		return map;
+		HashMap<String, Long> map = new LinkedHashMap<>();
+		for (User user : allUser) {
+			if (!(map.containsKey(user.getCountry()))) {
+				long count = 0;
+				for (User user2 : allUser) {
+					if (user.getCountry().equalsIgnoreCase(user2.getCountry())) {
+						count++;
+					}
+					map.put(user.getCountry(), count);
+				}
+			}
+		}
+		LinkedHashMap<String, Long> sortedMap = new LinkedHashMap<>();
+		map.entrySet().stream().sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+				.forEachOrdered(x -> sortedMap.put(x.getKey(), x.getValue()));
+		return sortedMap;
 	}
 
 	/**
@@ -172,7 +179,7 @@ public class DashboardServicesImp implements IDashboardServices {
 	}
 
 	/**
-	 * Get history of registrations.
+	 * Get history of last six months registrations.
 	 * 
 	 * @param Token(contains adminId).
 	 * @return no. of registration in two consecutive months groups.
@@ -208,7 +215,6 @@ public class DashboardServicesImp implements IDashboardServices {
 				count6++;
 			}
 		}
-
 		LinkedHashMap<String, Integer> map = new LinkedHashMap<>();
 		map.put("Present Month", count0);
 		map.put("First Last Month", count1);

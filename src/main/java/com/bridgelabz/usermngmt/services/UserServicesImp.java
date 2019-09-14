@@ -22,6 +22,7 @@ import com.bridgelabz.usermngmt.config.Utility;
 import com.bridgelabz.usermngmt.dto.LoginDto;
 import com.bridgelabz.usermngmt.dto.UserDto;
 import com.bridgelabz.usermngmt.exception.UserException;
+import com.bridgelabz.usermngmt.model.LoginHistory;
 import com.bridgelabz.usermngmt.model.User;
 import com.bridgelabz.usermngmt.repository.IUserRepository;
 
@@ -57,6 +58,9 @@ public class UserServicesImp implements IUserServices {
 
 	@Autowired
 	private Utility utility;
+
+	@Autowired
+	private LoginHistory loginHistory;
 
 	private final Path fileLocation = java.nio.file.Paths.get("/home/user/USER_DP/");
 
@@ -128,6 +132,10 @@ public class UserServicesImp implements IUserServices {
 			throw new UserException(environment.getProperty("user.role.admin"));
 		}
 		String token = tokenGenerator.createToken(user.get().getId());
+		loginHistory.setLocalDateTime(utility.getDateTime());
+		loginHistory.setUser(user.get());
+		user.get().getLoginHistory().add(loginHistory);
+		userRepository.save(user.get());
 		System.out.println(token);
 		return response.buildSuccesResponse(null);
 	}
@@ -191,6 +199,16 @@ public class UserServicesImp implements IUserServices {
 		return userRepository.findAll();
 	}
 
+	@Override
+	public List<LoginHistory> getloginHistory(String token, Long userId) throws UserException {
+		if (validateAdmin(token)) {
+			Optional<User> user = userRepository.findById(userId);
+			user.orElseThrow(() -> new UserException(environment.getProperty("user.doesn't.exist")));
+			return user.get().getLoginHistory();
+		}
+		return null;
+	}
+
 	/**
 	 * method for validating user.
 	 * 
@@ -220,4 +238,5 @@ public class UserServicesImp implements IUserServices {
 		}
 		return false;
 	}
+
 }
