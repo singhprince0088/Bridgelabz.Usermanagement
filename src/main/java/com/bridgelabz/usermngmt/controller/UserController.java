@@ -67,7 +67,7 @@ public class UserController {
 	@PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<Response> uploadImage(@RequestHeader String token, @RequestParam MultipartFile image)
 			throws UserException {
-		logger.info("uploading profile pic");
+		logger.info("uploading profile pic for user");
 		return new ResponseEntity<>(userServices.uploadImage(image, token), HttpStatus.OK);
 	}
 
