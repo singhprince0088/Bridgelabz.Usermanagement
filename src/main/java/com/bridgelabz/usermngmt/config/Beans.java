@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableAutoConfiguration
 @Configuration
 public class Beans {
-
+	
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
