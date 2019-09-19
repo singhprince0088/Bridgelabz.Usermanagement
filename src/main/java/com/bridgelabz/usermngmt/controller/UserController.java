@@ -107,7 +107,7 @@ public class UserController {
 	 * @throws UserException
 	 */
 	@DeleteMapping("/delete")
-	public ResponseEntity<Response> delete(@PathVariable Long userId, @RequestHeader String token)
+	public ResponseEntity<Response> delete(@RequestParam Long userId, @RequestHeader String token)
 			throws UserException {
 		return new ResponseEntity<>(userServices.delete(userId, token), HttpStatus.OK);
 	}
